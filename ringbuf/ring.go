@@ -87,13 +87,10 @@ func (rr *ringReader) readRecord(rec *Record) error {
 			continue
 		}
 
-		if n := header.dataLen(); cap(rec.RawSample) < n {
-			rec.RawSample = make([]byte, n)
-		} else {
-			rec.RawSample = rec.RawSample[:n]
+		if err := rec.Handle(rr.ring[start:]); err != nil {
+			return err
 		}
 
-		copy(rec.RawSample, rr.ring[start:])
 		rec.Remaining = int(prod - cons)
 		atomic.StoreUintptr(rr.cons_pos, cons)
 		return nil
