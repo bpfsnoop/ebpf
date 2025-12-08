@@ -59,6 +59,8 @@ type Record struct {
 
 	// The minimum number of bytes remaining in the ring buffer after this Record has been read.
 	Remaining int
+
+	Handle func([]byte) error
 }
 
 // Reader allows reading bpf_ringbuf_output
