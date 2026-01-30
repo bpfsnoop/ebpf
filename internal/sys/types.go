@@ -136,6 +136,7 @@ const (
 	BPF_SKB_CLOCK_TAI                          = 2
 	BPF_SKB_TSTAMP_DELIVERY_MONO               = 1
 	BPF_SKB_TSTAMP_UNSPEC                      = 0
+	BPF_SKEL_KERNEL                            = 1
 	BPF_SK_LOOKUP_F_NO_REUSEPORT               = 2
 	BPF_SK_LOOKUP_F_REPLACE                    = 1
 	BPF_SK_STORAGE_GET_F_CREATE                = 1
@@ -307,6 +308,7 @@ const (
 	BPF_PROG_STREAM_READ_BY_FD      Cmd = 37
 	BPF_PROG_ASSOC_STRUCT_OPS       Cmd = 38
 	__MAX_BPF_CMD                   Cmd = 39
+	BPF_COMMON_ATTRS                Cmd = 65536
 )
 
 type FunctionId uint32
