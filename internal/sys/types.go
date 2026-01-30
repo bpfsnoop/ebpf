@@ -44,9 +44,11 @@ const (
 	BPF_F_ADJ_ROOM_ENCAP_L4_UDP                = 16
 	BPF_F_ADJ_ROOM_FIXED_GSO                   = 1
 	BPF_F_ADJ_ROOM_NO_CSUM_RESET               = 32
+	BPF_F_ALL_CPUS                             = 16
 	BPF_F_BPRM_SECUREEXEC                      = 1
 	BPF_F_BROADCAST                            = 8
 	BPF_F_CLONE                                = 512
+	BPF_F_CPU                                  = 8
 	BPF_F_CTXLEN_MASK                          = 4503595332403200
 	BPF_F_CURRENT_CPU                          = 4294967295
 	BPF_F_CURRENT_NETNS                        = 18446744073709551615
@@ -59,23 +61,25 @@ const (
 	BPF_F_INGRESS                              = 1
 	BPF_F_INNER_MAP                            = 4096
 	BPF_F_INVALIDATE_HASH                      = 2
+	BPF_F_IPV6                                 = 128
 	BPF_F_KPROBE_MULTI_RETURN                  = 1
 	BPF_F_LINK                                 = 8192
 	BPF_F_LOCK                                 = 4
 	BPF_F_MARK_ENFORCE                         = 64
 	BPF_F_MARK_MANGLED_0                       = 32
 	BPF_F_MMAPABLE                             = 1024
-	BPF_F_NEIGH                                = 2
-	BPF_F_NEXTHOP                              = 8
+	BPF_F_NEIGH                                = 65536
+	BPF_F_NEXTHOP                              = 262144
 	BPF_F_NO_COMMON_LRU                        = 2
 	BPF_F_NO_PREALLOC                          = 1
 	BPF_F_NO_TUNNEL_KEY                        = 16
 	BPF_F_NO_USER_CONV                         = 262144
 	BPF_F_NUMA_NODE                            = 4
 	BPF_F_PATH_FD                              = 16384
-	BPF_F_PEER                                 = 4
+	BPF_F_PEER                                 = 131072
 	BPF_F_PRESERVE_ELEMS                       = 2048
 	BPF_F_PSEUDO_HDR                           = 16
+	BPF_F_RB_OVERWRITE                         = 524288
 	BPF_F_RDONLY                               = 8
 	BPF_F_RDONLY_PROG                          = 128
 	BPF_F_RECOMPUTE_CSUM                       = 1
@@ -101,12 +105,14 @@ const (
 	BPF_LOAD_HDR_OPT_TCP_SYN                   = 1
 	BPF_LOCAL_STORAGE_GET_F_CREATE             = 1
 	BPF_MAX_LOOPS                              = 8388608
+	BPF_MAX_TIMED_LOOPS                        = 65535
 	BPF_MAX_TRAMP_LINKS                        = 38
 	BPF_NOEXIST                                = 1
 	BPF_RB_AVAIL_DATA                          = 0
 	BPF_RB_CONS_POS                            = 2
 	BPF_RB_FORCE_WAKEUP                        = 2
 	BPF_RB_NO_WAKEUP                           = 1
+	BPF_RB_OVERWRITE_POS                       = 4
 	BPF_RB_PROD_POS                            = 3
 	BPF_RB_RING_SIZE                           = 1
 	BPF_REG_0                                  = 0
@@ -128,6 +134,7 @@ const (
 	BPF_SKB_CLOCK_TAI                          = 2
 	BPF_SKB_TSTAMP_DELIVERY_MONO               = 1
 	BPF_SKB_TSTAMP_UNSPEC                      = 0
+	BPF_SKEL_KERNEL                            = 1
 	BPF_SK_LOOKUP_F_NO_REUSEPORT               = 2
 	BPF_SK_LOOKUP_F_REPLACE                    = 1
 	BPF_SK_STORAGE_GET_F_CREATE                = 1
@@ -152,9 +159,15 @@ const (
 	BPF_SOCK_OPS_TCP_CONNECT_CB                = 3
 	BPF_SOCK_OPS_TCP_LISTEN_CB                 = 11
 	BPF_SOCK_OPS_TIMEOUT_INIT                  = 1
+	BPF_SOCK_OPS_TSTAMP_ACK_CB                 = 19
+	BPF_SOCK_OPS_TSTAMP_SCHED_CB               = 16
+	BPF_SOCK_OPS_TSTAMP_SENDMSG_CB             = 20
+	BPF_SOCK_OPS_TSTAMP_SND_HW_CB              = 18
+	BPF_SOCK_OPS_TSTAMP_SND_SW_CB              = 17
 	BPF_SOCK_OPS_VOID                          = 0
 	BPF_SOCK_OPS_WRITE_HDR_OPT_CB              = 15
 	BPF_SOCK_OPS_WRITE_HDR_OPT_CB_FLAG         = 64
+	BPF_STREAM_MAX_CAPACITY                    = 100000
 	BPF_TASK_ITER_ALL_PROCS                    = 0
 	BPF_TASK_ITER_ALL_THREADS                  = 1
 	BPF_TASK_ITER_PROC_THREADS                 = 2
@@ -244,7 +257,9 @@ const (
 	BPF_NETKIT_PRIMARY                 AttachType = 54
 	BPF_NETKIT_PEER                    AttachType = 55
 	BPF_TRACE_KPROBE_SESSION           AttachType = 56
-	__MAX_BPF_ATTACH_TYPE              AttachType = 57
+	BPF_TRACE_UPROBE_SESSION           AttachType = 57
+	BPF_TRACE_FSESSION                 AttachType = 58
+	__MAX_BPF_ATTACH_TYPE              AttachType = 59
 )
 
 type Cmd uint32
@@ -288,7 +303,10 @@ const (
 	BPF_LINK_DETACH                 Cmd = 34
 	BPF_PROG_BIND_MAP               Cmd = 35
 	BPF_TOKEN_CREATE                Cmd = 36
-	__MAX_BPF_CMD                   Cmd = 37
+	BPF_PROG_STREAM_READ_BY_FD      Cmd = 37
+	BPF_PROG_ASSOC_STRUCT_OPS       Cmd = 38
+	__MAX_BPF_CMD                   Cmd = 39
+	BPF_COMMON_ATTRS                Cmd = 65536
 )
 
 type FunctionId uint32
@@ -576,7 +594,8 @@ const (
 	BPF_MAP_TYPE_USER_RINGBUF                     MapType = 31
 	BPF_MAP_TYPE_CGRP_STORAGE                     MapType = 32
 	BPF_MAP_TYPE_ARENA                            MapType = 33
-	__MAX_BPF_MAP_TYPE                            MapType = 34
+	BPF_MAP_TYPE_INSN_ARRAY                       MapType = 34
+	__MAX_BPF_MAP_TYPE                            MapType = 35
 )
 
 type ObjType uint32
@@ -740,6 +759,9 @@ type MapInfo struct {
 	BtfValueTypeId        TypeID
 	BtfVmlinuxId          uint32
 	MapExtra              uint64
+	Hash                  uint64
+	HashSize              uint32
+	_                     [4]byte
 }
 
 type ProgInfo struct {
@@ -1129,6 +1151,9 @@ type MapCreateAttr struct {
 	MapExtra              uint64
 	ValueTypeBtfObjFd     int32
 	MapTokenFd            int32
+	ExclProgHash          uint64
+	ExclProgHashSize      uint32
+	_                     [4]byte
 }
 
 func MapCreate(attr *MapCreateAttr) (*FD, error) {
@@ -1450,7 +1475,10 @@ type ProgLoadAttr struct {
 	CoreReloRecSize    uint32
 	LogTrueSize        uint32
 	ProgTokenFd        int32
-	_                  [4]byte
+	FdArrayCnt         uint32
+	Signature          uint64
+	SignatureSize      uint32
+	KeyringId          int32
 }
 
 func ProgLoad(attr *ProgLoadAttr) (*FD, error) {
@@ -1625,7 +1653,9 @@ type RawTracepointLinkInfo struct {
 	_         [4]byte
 	TpName    TypedPointer[uint8]
 	TpNameLen uint32
-	_         [36]byte
+	_         [4]byte
+	Cookie    uint64
+	_         [24]byte
 }
 
 type TcxLinkInfo struct {
@@ -1648,7 +1678,9 @@ type TracingLinkInfo struct {
 	AttachType  AttachType
 	TargetObjId uint32
 	TargetBtfId TypeID
-	_           [36]byte
+	_           [4]byte
+	Cookie      uint64
+	_           [24]byte
 }
 
 type XDPLinkInfo struct {
