@@ -142,7 +142,7 @@ func attachBTFID(program *ebpf.Program, at ebpf.AttachType, cookie uint64) (Link
 	)
 	switch at {
 	case ebpf.AttachTraceFEntry, ebpf.AttachTraceFExit, ebpf.AttachTraceRawTp,
-		ebpf.AttachModifyReturn, ebpf.AttachLSMMac:
+		ebpf.AttachModifyReturn, ebpf.AttachLSMMac, ebpf.AttachTraceFSession:
 		// Attach via BPF link
 		fd, err = sys.LinkCreateTracing(&sys.LinkCreateTracingAttr{
 			ProgFd:     uint32(program.FD()),
@@ -201,7 +201,7 @@ func AttachTracing(opts TracingOptions) (Link, error) {
 
 	switch opts.AttachType {
 	case ebpf.AttachTraceFEntry, ebpf.AttachTraceFExit, ebpf.AttachModifyReturn,
-		ebpf.AttachTraceRawTp, ebpf.AttachNone:
+		ebpf.AttachTraceRawTp, ebpf.AttachNone, ebpf.AttachTraceFSession:
 	default:
 		return nil, fmt.Errorf("invalid attach type: %s", opts.AttachType.String())
 	}
