@@ -92,6 +92,22 @@ func TestBuilderSpec(t *testing.T) {
 	qt.Assert(t, qt.IsNil(err))
 }
 
+func TestBuilderSpec(t *testing.T) {
+	b, err := NewBuilder([]Type{
+		&Int{Name: "foo", Size: 2},
+		&Int{Name: "foo", Size: 2},
+	}, &BuilderOptions{Deduplicate: true})
+	qt.Assert(t, qt.IsNil(err))
+
+	spec, err := b.Spec()
+	qt.Assert(t, qt.IsNil(err))
+
+	// With deduplication enabled, both ints should be merged into one,
+	// allowing queries with AnyTypeByName.
+	_, err = spec.AnyTypeByName("foo")
+	qt.Assert(t, qt.IsNil(err))
+}
+
 func TestRoundtripVMlinux(t *testing.T) {
 	types := typesFromSpec(t, vmlinuxSpec(t))
 
