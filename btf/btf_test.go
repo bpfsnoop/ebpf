@@ -110,6 +110,53 @@ func TestAnyTypesByName(t *testing.T) {
 	})
 }
 
+func TestAnyTypesByNameExactMatch(t *testing.T) {
+	spec := specFromTypes(t, []Type{
+		&Int{Name: "foo___one", Size: 4},
+		&Int{Name: "foo___two", Size: 4},
+		&Int{Name: "foo", Size: 4},
+	})
+
+	types, err := spec.AnyTypesByName("foo")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.HasLen(types, 1))
+	qt.Assert(t, qt.Equals(types[0].TypeName(), "foo"))
+}
+
+func TestAnyTypesByNameNoExactMatch(t *testing.T) {
+	spec := specFromTypes(t, []Type{
+		&Int{Name: "foo___flavour", Size: 4},
+	})
+
+	types, err := spec.AnyTypesByName("foo")
+	qt.Assert(t, qt.ErrorIs(err, ErrNotFound))
+	qt.Assert(t, qt.IsNil(types))
+}
+
+func TestAnyTypesByNameLeadingUnderscores(t *testing.T) {
+	// Kernel function names such as ___pskb_trim start with a triple
+	// underscore. This isn't a flavour delimiter, so the full name must
+	// remain queryable.
+	spec := specFromTypes(t, []Type{
+		&Int{Name: "___pskb_trim", Size: 4},
+	})
+
+	types, err := spec.AnyTypesByName("___pskb_trim")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.HasLen(types, 1))
+	qt.Assert(t, qt.Equals(types[0].TypeName(), "___pskb_trim"))
+}
+
+func TestAnyTypeByNameNoExactMatch(t *testing.T) {
+	spec := specFromTypes(t, []Type{
+		&Int{Name: "foo___flavour", Size: 4},
+	})
+
+	typ, err := spec.AnyTypeByName("foo")
+	qt.Assert(t, qt.ErrorIs(err, ErrNotFound))
+	qt.Assert(t, qt.IsNil(typ))
+}
+
 func TestTypeByNameAmbiguous(t *testing.T) {
 	testutils.Files(t, testutils.Glob(t, "testdata/relocs-*.elf"), func(t *testing.T, file string) {
 		spec := parseELFBTF(t, file)
@@ -518,7 +565,6 @@ func TestSpecConcurrentAccess(t *testing.T) {
 	var wg sync.WaitGroup
 	for range maxprocs {
 		wg.Go(func() {
-
 			n := cond.Add(1)
 			for cond.Load() != int64(maxprocs) {
 				// Spin to increase the chances of a race.
