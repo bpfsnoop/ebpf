@@ -225,6 +225,59 @@ func flattenInstructions(name string, progs map[string]*ProgramSpec, refs map[*P
 	return insns
 }
 
+// stubSection is the ELF section of the funcs that programs may call without
+// any C code calling them, see linkStubs.
+const stubSection = ".text.stub"
+
+// linkStubs links the funcs of the .text.stub section that insns call into
+// insns, and the funcs that those call in turn.
+//
+// The ELF reader keeps a func of .text only where programs call it, but a func
+// of .text.stub, like those of any section other than .text, becomes a program
+// of its own, which NewCollection skips as it has no program type. So the
+// instructions of a program can call it even if they're added after loading
+// the CollectionSpec, e.g. generated at run time.
+func linkStubs(insns asm.Instructions, progs map[string]*ProgramSpec) asm.Instructions {
+	// All funcs in insns, by symbol.
+	linked := make(map[string]bool)
+	for _, ins := range insns {
+		if sym := ins.Symbol(); sym != "" {
+			linked[sym] = true
+		}
+	}
+
+	// Iterate all pending references. We can't use a range since pending is
+	// modified in the body below.
+	pending := insns.FunctionReferences()
+	for len(pending) > 0 {
+		var ref string
+		ref, pending = pending[0], pending[1:]
+
+		stub := progs[ref]
+		if linked[ref] || stub == nil || stub.SectionName != stubSection {
+			continue
+		}
+
+		// The ELF reader links the funcs that a stub calls into its
+		// instructions. Skip those that insns already have.
+		link := false
+		for _, ins := range stub.Instructions {
+			if sym := ins.Symbol(); sym != "" {
+				link = !linked[sym]
+				linked[sym] = true
+			}
+			if link {
+				insns = append(insns, ins)
+			}
+		}
+
+		// Make sure we link indirect references.
+		pending = append(pending, stub.Instructions.FunctionReferences()...)
+	}
+
+	return insns
+}
+
 // fixupAndValidate is called by the ELF reader right before marshaling the
 // instruction stream. It performs last-minute adjustments to the program and
 // runs some sanity checks before sending it off to the kernel.

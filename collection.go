@@ -474,6 +474,10 @@ func (cl *collectionLoader) loadProgram(progName string) (*Program, error) {
 
 	progSpec = progSpec.Copy()
 
+	// Link the funcs of .text.stub that the program calls, which the ELF
+	// reader can't if the calls were added after loading the CollectionSpec.
+	progSpec.Instructions = linkStubs(progSpec.Instructions, cl.coll.Programs)
+
 	// Rewrite any reference to a valid map in the program's instructions,
 	// which includes all of its dependencies.
 	for i := range progSpec.Instructions {

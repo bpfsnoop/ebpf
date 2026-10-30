@@ -76,6 +76,20 @@ called `kprobe/slub_flush`.
     matching the kernel's `LINUX_VERSION_CODE` for Kprobe-type programs. Always
     omit this, {{ proj }} will populate this field automatically if needed.
 
+`.text.stub`
+
+:   Functions that no C code calls, for instructions added to a
+    {{ godoc('ProgramSpec') }} after loading the {{ godoc('CollectionSpec') }},
+    e.g. generated at run time. A function in `.text` is only kept where
+    programs call it, so such calls can't find it. A function in `.text.stub`
+    is kept, and loading the CollectionSpec links it into the programs whose
+    instructions call it. It isn't loaded on its own, and bpf2go doesn't
+    generate a program for it.
+
+    Mark it `used` to keep the compiler from dropping it, and keep it `static`
+    so that the verifier checks it with the arguments of each call:
+    `#!c __attribute__((section(".text.stub"), used)) static __noinline int f(int x)`.
+
 ### Map Sections
 
 `.maps`
