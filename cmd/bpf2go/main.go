@@ -417,7 +417,12 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 	}
 
 	var programs []string
-	for name := range spec.Programs {
+	for name, prog := range spec.Programs {
+		// Funcs of .text.stub are linked into the programs calling them,
+		// they can't be loaded on their own.
+		if prog.SectionName == ".text.stub" {
+			continue
+		}
 		programs = append(programs, name)
 	}
 

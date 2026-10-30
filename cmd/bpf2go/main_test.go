@@ -144,6 +144,29 @@ func TestDisableStripping(t *testing.T) {
 	}
 }
 
+func TestStubsAreNotPrograms(t *testing.T) {
+	dir := t.TempDir()
+	mustWriteFile(t, dir, "test.c", `
+__attribute__((section(".text.stub"), used)) static int stub() { return 1; }
+__attribute__((section("socket"), used)) int main() { return 0; }
+`)
+
+	err := run(io.Discard, []string{
+		"-go-package", "foo",
+		"-output-dir", dir,
+		"-cc", testutils.ClangBin(t),
+		"-target", "bpfel",
+		"bar",
+		filepath.Join(dir, "test.c"),
+	})
+	qt.Assert(t, qt.IsNil(err))
+
+	out, err := os.ReadFile(filepath.Join(dir, "bar_bpfel.go"))
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.StringContains(string(out), `ebpf:"main"`))
+	qt.Assert(t, qt.Not(qt.StringContains(string(out), `ebpf:"stub"`)))
+}
+
 func TestConvertGOARCH(t *testing.T) {
 	tmp := t.TempDir()
 	mustWriteFile(t, tmp, "test.c",
