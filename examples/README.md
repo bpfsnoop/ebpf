@@ -26,6 +26,8 @@ Please see our [guide on what makes a good example](https://ebpf-go.dev/contribu
   * [xdp_live_frame](xdp_live_frame/) - XDP-based traffic generator that uses live frame mode.
 * sched_ext - Attach a StructOpsMap to register a custom task scheduler. This feature is supported by kernel version starting from version 6.12.
   * [sched_ext](sched_ext/) - Minimal sched_ext_ops.
+* Stub - Call funcs that no C code calls from instructions generated at run time.
+  * [stub](stub/) - Replace the body of a func with instructions that call a func of `.text.stub`.
 
 ## How to run
 
